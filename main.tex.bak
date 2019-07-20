@@ -1,0 +1,364 @@
+\documentclass{beamer}
+\usetheme{Warsaw}
+
+\usepackage{algorithm}
+\input{Qcircuit}
+\usepackage[noend]{algpseudocode}
+
+\setbeamertemplate{caption}[numbered]
+
+% remove headlines at a certain frame
+
+\makeatletter
+    \newenvironment{withoutheadline}{
+        \setbeamertemplate{headline}[default]
+        \def\beamer@entrycode{\vspace*{-\headheight}}
+    }{}
+\makeatother
+
+
+\setbeamertemplate{footline}{%
+  \leavevmode%
+  \hbox{\begin{beamercolorbox}[wd=.5\paperwidth,ht=4.5ex,dp=2.125ex,leftskip=.3cm plus1fill,rightskip=.3cm]{author in head/foot}%
+    \usebeamerfont{author in head/foot}\insertshortauthor
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=4.5ex,dp=2.125ex,leftskip=.3cm,rightskip=.3cm plus1fil]{title in head/foot}%
+    \usebeamerfont{title in head/foot}
+    \parbox{.45\paperwidth}{\inserttitle}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+% numbering references
+\setbeamertemplate{bibliography item}{\insertbiblabel}
+
+\title{A Quantum Algorithm for Finding Common Matches between Databases with Reliable Behavior}
+
+\author{Khaled El-Wazan}
+
+\institute{Department of Mathematics and Computer Science, Faculty of Science, Alexandria University, Egypt}
+
+\date{}
+
+\begin{document}
+
+\begin{withoutheadline}
+\begin{frame}
+\maketitle
+
+\end{frame}
+\end{withoutheadline}
+
+
+
+%\begin{withoutheadline}
+\begin{frame}
+\tableofcontents
+\end{frame}
+%\end{withoutheadline}
+
+
+\section{Introduction}
+
+\subsection*{Problem Statement}
+\begin{frame}
+\frametitle{Problem Statement}
+
+\begin{definition}
+Consider having a set $\mathcal{Z}$ of $\kappa\geq 2$ lists, $\mathcal{Z}=\{L_0,\cdots,L_{\kappa-1}\}$. Each list $L_j\in \mathcal{Z}$ is of \textcolor{red}{$N=2^n$} \textcolor{red}{unstructured entries}, which has an oracle $U_j$ that is being used to access those entries in $L_j$. Each entry $i\in L_j=\{0,1,\cdots,N-1\}$ in the list $L_j$ is \textcolor{red}{mapped to either $0$ or $1$} according to any certain property satisfied by $i$ in $L_j$, \textit{i.e.} $f_j:L_j\rightarrow\{0,1\}$. The common elements problem is stated as follows: find the entry $i\in L_j $  such that $ \forall L_j\in \mathcal{Z},~ f_j(i)=1$.
+\end{definition}
+
+\begin{example}
+
+$f_0(x_0,x_1,x_2)=x_0x_1$, $~~solns=\{110,111\}$ \\ $f_1(x_0,x_1,x_2)=x_0x_1x_2 $,  $solns=\{111\}$
+
+\end{example}
+
+
+\end{frame}
+
+
+
+\subsection*{Literature Review}
+\begin{frame}
+
+\frametitle{Literature Review}
+
+\begin{itemize}
+
+
+\item In 1998, Burhman \textit{et al.} introduced a quantum algorithm \cite{buhrman} find common entries between \textcolor{red}{remotely separated lists} in $\mathcal{O}(p\sqrt{N})$, with $p$ trials and $N=2^n$.
+
+\item In 2012, Tulsi provided a quantum algorithm \cite{tulsi} to find a \textcolor{red}{single} common entry between \textcolor{red}{two lists} using Grover algorithm, in $\mathcal{O}(\sqrt{N})$. 
+
+\item In 2013, Pang \textit{et al.} proposed a quantum algorithm \cite{pang} to find common entries between two sets stored in \textcolor{red}{classical memory}, in $\mathcal{O}(\sqrt{N^2/C})$, where $C$ is the number of common entries.
+
+\end{itemize}
+\end{frame}
+
+
+\section{Amplitude Amplification}
+\begin{frame}
+\frametitle{Amplitude Amplification}
+\begin{itemize}
+
+\item In 1996, Grover proposed a \textcolor{red}{unique approach} \cite{grover} to find a \textcolor{red}{single item} in a database, in $\mathcal{O}(\sqrt{N})$.
+
+\item Boyer \textit{et al.} later \textcolor{red}{generalized Grover}'s quantum search algorithm \cite{quant-tightbound-for-search,grover-younes} to fit the purpose of \textcolor{red}{finding multiple} solutions $M$ to the oracle, in $\mathcal{O}(\sqrt{N/M})$.
+
+\item \textcolor{red}{Grover}'s algorithm amplifies solutions to an \textcolor{red}{extend}, \textit{i.e.} $1\leq M\leq 3N/4$ \cite{quant-tightbound-for-search,grover-younes}.
+
+\item Younes \textit{et al}'s algorithm \cite{younes} is \textcolor{red}{reliable} in case of multiple matches, \textit{i.e.} $1\leq M\leq N$. 
+
+\item Both run in $\mathcal{O}(\sqrt{N/M})$. 
+
+
+\end{itemize}
+
+
+\end{frame}
+
+
+\begin{frame}
+
+\begin{algorithm}[H]
+\caption{Younes quantum search algorithm.\label{1st-algo}}
+\begin{algorithmic}[1]
+
+\State \textcolor{red}{Prepare} a quantum register of $n+1$ qubits to the state $\ket{0}^{n+1}$.
+\item Apply the Hadamard gates on the register to create a \textcolor{red}{uniform superposition} $\frac{1}{\sqrt{N}}\sum_{l=0}^{N-1}{\vert l\rangle}$.
+\State  \textcolor{red}{Iterate} over the following \textcolor{red}{$q=\frac{\pi}{2\sqrt{2}}\sqrt{\frac{N}{M}}$} steps:
+\begin{enumerate}[1.]
+\item Apply the \textcolor{red}{function $U_f$}, to mark the solutions with entanglement.
+\item Apply the \textcolor{red}{ diffusion operator} 
+
+\begin{equation*}
+Y=(H^{\otimes n}\otimes I )(2\vert 0\rangle\langle 0\vert -I_{n+1})(H^{\otimes n}\otimes I).
+\end{equation*}
+
+
+\end{enumerate}
+
+\State \textcolor{red}{Measure} the output.
+
+\end{algorithmic}
+\end{algorithm}
+
+\end{frame}
+
+
+\section{Constructing the Oracle $U_\hbar$}
+
+\subsection*{Constructing the oracle $U_\hbar$ for two databases}
+
+\begin{frame}
+\frametitle{Common Entries Oracle Construction: Two Oracles}
+
+
+\begin{figure}[H]
+\begin{align*}
+\Qcircuit @C=0.3em @R=.3em  {
+\lstick{\mid x_0 \rangle}& \qw & \qw & \qw & \qw & \multigate{8}{U_A}   & \qw & \qw & \qw & \multigate{8}{U_B} & \qw & \qw & \multigate{8}{U_A} & \qw & \multigate{8}{U_B} & \qw &\qw\\
+\lstick{\mid x_1 \rangle}& \qw & \qw & \qw & \qw & \ghost{U_A}  & \qw & \qw & \qw & \ghost{U_B} & \qw & \qw & \ghost{U_A}& \qw & \ghost{U_B}& \qw  & \qw\\
+& . & . & . & . &  & .  & . & . &  & .  & . &  & . && .\\
+& . & . & . & . &  & .  & . & . &  & .  & . &  & . && .\\
+\lstick{\mid x_i \rangle} & \qw & \qw & \qw & \qw & \ghost{U_A} & \qw & \qw & \qw & \ghost{U_B} & \qw & \qw & \ghost{U_A}& \qw & \ghost{U_B}& \qw  & \qw\\
+& . & . & . & . &  & .  & . & . &  &  . & . &   & .&& .\\
+& . & . & . & . &  & .  & . & . &  &   .& . &   & .&& .\\
+\lstick{\mid x_{n-2} \rangle}& \qw & \qw & \qw & \qw & \ghost{U_A}  & \qw & \qw & \qw & \ghost{U_B} & \qw & \qw & \ghost{U_A}& \qw & \ghost{U_B}& \qw  & \qw \\
+\lstick{\mid x_{n-1} \rangle}& \qw & \qw & \qw & \qw & \ghost{U_A}  & \qw & \qw & \qw & \ghost{U_B} & \qw & \qw & \ghost{U_A}& \qw & \ghost{U_B}& \qw & \qw \\
+\lstick{\mid x_n \rangle}& \qw & \qw & \qw & \qw &  \targ{-1} \qwx & \qw  & \qw & \qw  & \qw \qwx & \multigate{1}{U_\kappa} & \qw & \targ \qwx & \qw &\qw \qw \qwx & \qw & \qw \\
+\lstick{\mid x_{n+1} \rangle}& \qw & \qw & \qw & \qw &  \qw & \qw  & \qw & \qw & \targ \qwx & \ghost{U_\kappa} & \qw  & \qw & \qw &\targ \qwx &\qw& \qw  \\
+\lstick{\mid x_{n+2} \rangle}& \qw & \qw & \qw & \qw &  \qw & \qw  & \qw & \qw & \qw & \targ \qwx & \qw  & \qw & \qw  & \qw& \qw & \qw \\
+}
+\end{align*}
+\caption{ A quantum circuit for the proposed oracle $U_\hbar$ for $\kappa=2$ databases, where $f_\kappa=x_nx_{n+1}$.\label{fig:proposed-oracle-circuit-2fns}}
+\end{figure}
+
+
+
+
+\end{frame}
+
+
+
+
+\subsection*{The oracle $U_\hbar$ for more than two databases}
+
+\begin{frame}
+
+\frametitle{Common Entries Oracle Construction: $\kappa$ Oracles}
+\begin{figure}[H]
+\begin{align*}
+\Qcircuit @C=0.25em @R=.25em  {
+\lstick{\mid x_0 \rangle}& \qw& \multigate{4}{U_0} & \qw & \multigate{4}{U_1}& \qw & . & . & & \qw & \multigate{4}{U_{\kappa-1}} &  \qw&\qw& \qw&\qw &\multigate{4}{U_0} & \qw & \multigate{4}{U_1}& \qw & . & . & & \qw & \multigate{4}{U_{\kappa-1}}&\qw \\
+\lstick{\mid x_1 \rangle}& \qw& \ghost{U_0} & \qw & \ghost{U_1}& \qw & . & . & & \qw & \ghost{U_\kappa-1} &  \qw&\qw& \qw&\qw &\ghost{U_0} & \qw & \ghost{U_1}& \qw & . & . & & \qw & \ghost{U_{\kappa-1}}&\qw \\
+.& .&  & . &  & . & . & . & & . &   &  . & . & . & . &  & . &  & . & . & . & & . &  &. \\
+.& .&  & . &  & . & . & . & & . &   &  . & . & . & . &  & . &  & . & . & . & & . &  &. \\
+\lstick{\mid x_{n-1} \rangle}& \qw& \ghost{U_0} & \qw & \ghost{U_1}& \qw & . & . & & \qw & \ghost{U_{\kappa-1}} &  \qw&\qw& \qw&\qw &\ghost{U_0} & \qw & \ghost{U_1}& \qw & . & . & & \qw & \ghost{U_{\kappa-1}}&\qw \\
+\lstick{\ket{x_n}} &\qw & \targ \qwx & \qw & \qw \qwx & \qw & . & . & & \qw & \qw\qwx & \qw & \multigate{4}{U_\kappa} & \qw & \qw  & \targ \qwx & \qw & \qw \qwx & \qw & . & . & & \qw & \qw\qwx & \qw & \\
+\lstick{\ket{x_{n+1}}} &\qw & \qw & \qw & \targ \qwx & \qw & . & . & & \qw & \qw\qwx & \qw & \ghost{U_\kappa} & \qw & \qw  & \qw & \qw&\targ \qwx  & \qw & . & . & & \qw & \qw\qwx & \qw & \\
+  & . & . & . & . & . & . & . & . & . & \qwx & . &  & . & . & . & . & . & . & . & . & .& . & \qwx & . \\
+    & . & . & . & . & . & . & . & . & . & \qwx & . &  & . & . & . & . & . & . & . & . & .& . & \qwx & . \\
+\lstick{\ket{x_{n+\kappa-1}}} &\qw & \qw & \qw & \qw & \qw & . & . & & \qw & \targ\qwx & \qw & \ghost{U_\kappa} & \qw & \qw  & \qw & \qw&\qw  & \qw & . & . & & \qw & \targ\qwx & \qw & \\
+\lstick{\ket{x_{n+\kappa}}} &\qw & \qw & \qw&\qw & \qw & \qw&\qw & \qw & \qw&\qw & \qw & \targ\qwx  &\qw & \qw & \qw&\qw & \qw & \qw&\qw & \qw & \qw&\qw & \qw & \qw &
+}
+\end{align*}
+\caption{A quantum circuit for the proposed oracle $U_\hbar$ for $\kappa$ functions, where $f_\kappa=x_nx_{n+1}\cdots x_{n+\kappa}$.}
+\end{figure}
+
+
+
+\end{frame}
+
+\section{The Proposed Algorithm}
+
+\begin{frame}[allowframebreaks]
+\frametitle{The Proposed Algorithm}
+
+%The algorithm is carried quantum mechanically as follows:
+
+\begin{algorithm}[H]
+\label{1st-algo}
+\begin{algorithmic}[1]
+\State Construct the oracle $U_\hbar$.
+% \If{$\forall U_j$, $\parallel U_j\parallel=n$}
+% 	 $e=\kappa$
+%\Else  
+%	~$e=\Delta$	 	 
+%\EndIf
+\State Set the quantum register to $\ket{0}^{\otimes n}$ and the extra $\kappa+1$ qubits to $\ket{0}$.
+\State Apply the Hadamard gates to the first $n$ qubits to create the uniform superposition $\frac{1}{\sqrt{N}}\sum_{i=0}^{N-1}{\ket{i}}\otimes \ket{0}^{\otimes \kappa+1}$.
+\State \iterate Iterate over the following \textcolor{red}{$q_c=\frac{\pi}{2\sqrt{2}}\sqrt{\frac{N}{C}}$} steps:
+\begin{enumerate}
+\item Apply the oracle $U_\hbar$.
+\item Apply the diffusion operator $Y$.%=(H^{\otimes n}\otimes I)(2\ket{0}\bra{0}-I_{n+1})(H^{\otimes n}\otimes I)$.
+
+\end{enumerate}
+\State Measure the output.
+\end{algorithmic}
+\caption{The Proposed Algorithm.}
+\end{algorithm}
+
+
+\begin{figure}[H]
+\begin{align*}
+\Qcircuit @C=1em @R=.7em {
+  \lstick{\ket{0}} & /^n \qw & \gate{H^{\otimes n}} & \multigate{2}{U_{\hbar}} & \multigate{2}{Y}	 & \qw  & \meter \\
+  \lstick{\ket{0}}   & /^\kappa  \qw  & \qw &  \ghost{U_\hbar}  &\ghost{Y} & \qw &\qw\\
+   \lstick{\ket{0}}   & \qw  & \qw   &  \ghost{U_\hbar} & \ghost{Y}   & \qw & \qw   \gategroup{1}{4}{3}{5}{.7em}{_\}} & 
+   \\
+   &&&\dstick{\mathcal{O}(\kappa\sqrt{N/C})}& 
+ }
+\end{align*}
+\caption{Quantum circuit for the proposed algorithm.
+\label{proposed-algorithm-circuit}}
+\end{figure}
+
+\end{frame}
+
+
+
+\section{Analysis of the Proposed Algorithm}
+\begin{frame}
+\frametitle{Analysis of the Proposed Algorithm}
+
+\begin{itemize}
+
+\item \textit{In case of \textcolor{red}{known} number of common matches $C$ between $\kappa$ databases.} The proposed algorithm requires $\mathcal{O}(\kappa\sqrt{N/C})$, where $1\leq C\leq N$. 
+
+\item \textit{In case of \textcolor{red}{unknown} number of common matches between databases}. 
+\begin{itemize}
+\item An algorithm \cite{quant-count} for estimating the number of matches was presented by Brassard \textit{et al.}, known as \textcolor{red}{quantum counting}.
+
+\item Another algorithm \cite{younes} was presented by Younes \textit{et al.} to search for a match in a database, with \textcolor{red}{unknown number} of matches.
+
+\end{itemize}
+
+\end{itemize}
+
+
+\end{frame}
+
+\section{Comparison with other Literature}
+\begin{frame}
+\frametitle{Comparison with other Literature}
+\begin{table}[H]
+\begin{tabular}{|c|c|c|}
+\hline
+& Tulsi \cite{tulsi} &Proposed Algorithm \\
+\hline
+Number of common entries $C$ & $1\leq C\leq 3N/4$ & $1\leq C\leq N$ \\ \hline
+Number of databases $\kappa$ & $\kappa=2$ & $\kappa\geq 2$ \\ \hline
+Query calls: $\kappa=2,~C=1$ & $\mathcal{O}(\sqrt{N})$ & $\mathcal{O}(\sqrt{N})$ \\ \hline 
+Query calls: $\kappa=2,C\geq 2$ & $\mathcal{O}(\sqrt{N/C})$ & $\mathcal{O}(\sqrt{N/C})$  \\ \hline
+Query calls: $\kappa>2, C\geq 1$ & NA & $\mathcal{O}(\kappa\sqrt{N/C})$  \\ \hline 
+
+
+\end{tabular} 
+
+\caption{Comparison between the proposed algorithm and relevant literature.}
+
+\end{table}
+
+
+\end{frame}
+
+
+\section{Perspective}
+\begin{frame}[allowframebreaks]
+\frametitle{Conclusion}
+
+\begin{itemize}
+
+\item Proposed a quantum algorithm to \textcolor{red}{find the common entries} between $\kappa$ databases.
+
+\item Each database uses an \textcolor{red}{oracle to access} its entries.
+
+\item Using the given oracles, we \textcolor{red}{constructed} another oracle that exhibits the \textcolor{red}{behavior of finding} only the common entries between those databases, using \textcolor{red}{entanglement}.
+
+
+\item \textcolor{red}{Amplitude amplification} algorithm is followed to increase the success probability of finding the common entries.
+
+
+\item The proposed algorithm \textcolor{red}{requires $\mathcal{O}(\kappa\sqrt{N/C})$} to find the common matches, such that $1\leq C\leq N$.
+
+
+\item The proposed oracle \textcolor{red}{can be extended} using \cite{quant-count} to \textcolor{red}{count} the number of common entries between any given oracles, or find a match as in \cite{quant-tightbound-for-search,younes}, when the number of common entries $C$ is \textcolor{red}{unknown}.
+
+
+\item The proposed algorithm can be used to \textcolor{red}{solve a system of binary equations} with \textcolor{red}{no constraints} on the form of the equations contrary to \cite{Schwabe}.
+
+
+\item Utilizing the proposed oracle with quantum counting, it can be used to measure the \textcolor{red}{Hamming distance} between oracles similar to \cite{Xie2018,hamming-khaled}.
+
+\end{itemize}
+
+
+
+\end{frame}
+
+
+\begin{withoutheadline}
+ \begin{frame}
+  \vfill
+  \centering
+  \begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+    \usebeamerfont{title} Bibliography\par%
+  \end{beamercolorbox}
+  \vfill
+  \end{frame}
+\end{withoutheadline}  
+
+\begingroup 
+    \setbeamertemplate{headline}{}
+
+\addcontentsline{toc}{Bibliography}
+
+\bibliography{references}
+\bibliographystyle{IEEEtran}
+
+\endgroup
+
+
+\end{document}

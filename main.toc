@@ -1,0 +1,8 @@
+\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
+\beamer@sectionintoc {2}{Amplitude Amplification}{5}{0}{2}
+\beamer@sectionintoc {3}{Constructing the Oracle $U_\hbar $}{7}{0}{3}
+\beamer@sectionintoc {4}{The Proposed Algorithm}{9}{0}{4}
+\beamer@sectionintoc {5}{Analysis of the Proposed Algorithm}{12}{0}{5}
+\beamer@sectionintoc {6}{Comparison with other Literature}{13}{0}{6}
+\beamer@sectionintoc {7}{Perspective}{14}{0}{7}
+\contentsline {Bibliography}{\par }
